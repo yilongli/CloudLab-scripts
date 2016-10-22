@@ -2,6 +2,9 @@
 apt-get update
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper libssl-dev openjdk-8-jdk
 
+# Install other utilities
+apt-get --assume-yes vim pdsh
+
 # Setup password-less ssh between nodes
 /usr/bin/geni-get key > /root/.ssh/id_rsa
 chmod 600 /root/.ssh/id_rsa
