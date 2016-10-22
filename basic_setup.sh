@@ -4,10 +4,10 @@ apt-get update
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper libssl-dev openjdk-8-jdk
 
 # Install other utilities
-apt-get --assume-yes vim pdsh
+apt-get --assume-yes install vim pdsh
 
 # NFS
-apt-get --assume-yes nfs-kernel-server nfs-common
+apt-get --assume-yes install nfs-kernel-server nfs-common
 
 # Setup password-less ssh between nodes
 for user in `ls /users`; do
