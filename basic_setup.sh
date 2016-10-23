@@ -28,3 +28,6 @@ for user in `ls /users`; do
 EOL
     chmod 644 $ssh_dir/config
 done
+
+# Change user login shell to Bash
+chsh -s `which bash`
