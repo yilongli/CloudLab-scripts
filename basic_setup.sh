@@ -1,3 +1,5 @@
+#!bin/bash
+
 # What is the difference between `sudo bash basic_setup.sh` and appending `sudo` in front of commands in this script?
 # Install RAMCloud dependencies
 apt-get update
@@ -10,8 +12,13 @@ apt-get --assume-yes install vim tmux pdsh
 apt-get --assume-yes install nfs-kernel-server nfs-common
 
 # Setup password-less ssh between nodes
-for user in `ls /users`; do
-    ssh_dir=/users/$user/.ssh
+users="root `ls /users`"
+for user in $users; do
+    if [ "$user" = "root" ]; then
+        ssh_dir=/root/.ssh
+    else
+        ssh_dir=/users/$user/.ssh
+    fi
     /usr/bin/geni-get key > $ssh_dir/id_rsa
     chmod 600 $ssh_dir/id_rsa
     chown $user: $ssh_dir/id_rsa
@@ -29,3 +36,6 @@ done
 for user in `ls /users`; do
     chsh -s `which bash` $user
 done
+
+# Fix "rcmd: socket: Permission denied" when using pdsh
+echo "ssh" > /etc/pdsh/rcmd_default
