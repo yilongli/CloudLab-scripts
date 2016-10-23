@@ -11,10 +11,6 @@ apt-get --assume-yes install nfs-kernel-server nfs-common
 
 # Setup password-less ssh between nodes
 for user in `ls /users`; do
-    if [ "$user" = "geniuser" ]; then
-        continue
-    fi
-
     ssh_dir=/users/$user/.ssh
     /usr/bin/geni-get key > $ssh_dir/id_rsa
     chmod 600 $ssh_dir/id_rsa
@@ -30,4 +26,6 @@ EOL
 done
 
 # Change user login shell to Bash
-chsh -s `which bash`
+for user in `ls /users`; do
+    chsh -s `which bash` $user
+done
