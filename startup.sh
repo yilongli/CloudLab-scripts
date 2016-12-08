@@ -3,15 +3,19 @@
 # Assuming Ubuntu 14.04
 
 # What is the difference between `sudo bash startup.sh` and appending `sudo` in front of commands in this script?
-# Install RAMCloud dependencies
-apt-get update
-apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper libssl-dev openjdk-8-jdk
 
-# Install other utilities
+apt-get update
+# Install common utilities
 apt-get --assume-yes install vim tmux pdsh tree
 
 # NFS
 apt-get --assume-yes install nfs-kernel-server nfs-common
+
+# Install RAMCloud dependencies
+apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
+        protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev \
+        libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
+        libssl-dev openjdk-8-jdk
 
 # Setup password-less ssh between nodes
 users="root `ls /users`"
@@ -49,7 +53,6 @@ echo 8021q >> /etc/modules
 # NFS server setup
 hostname=`hostname --short`
 if [ "$hostname" = "rcmaster" ]; then
-    update-rc.d nfs-kernel-server enable
     mkdir /shome
     chmod 777 /shome
     echo "/shome *(rw,sync,no_root_squash)" >> /etc/exports
@@ -62,6 +65,8 @@ if [ "$hostname" = "rcmaster" ]; then
     # Get Mellanox OFED
     wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
     tar xzf MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
+    mv MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64 MLNX_OFED
+    MLNX_OFED/mlnxofedinstall --force --without-fw-update
 
     # Get RAMCloud
     git clone https://github.com/PlatformLab/RAMCloud.git
