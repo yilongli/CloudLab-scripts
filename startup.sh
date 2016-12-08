@@ -4,7 +4,7 @@
 
 apt-get update
 # Install common utilities
-apt-get --assume-yes install vim tmux pdsh tree
+apt-get --assume-yes install vim tmux pdsh tree axel
 
 # NFS
 apt-get --assume-yes install nfs-kernel-server nfs-common
@@ -14,12 +14,6 @@ apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev \
         libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
         libssl-dev openjdk-8-jdk
-
-# Install Mellanox OFED
-MLNX_OFED="MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64"
-wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/$MLNX_OFED.tgz
-tar xzf $MLNX_OFED.tgz
-$MLNX_OFED/mlnxofedinstall --force --without-fw-update
 
 # Setup password-less ssh between nodes
 users="root `ls /users`"
@@ -50,7 +44,7 @@ done
 # Fix "rcmd: socket: Permission denied" when using pdsh
 echo ssh > /etc/pdsh/rcmd_default
 
-# Load 8021q module
+# Load 8021q module at boot time
 echo 8021q >> /etc/modules
 
 # NFS server setup
@@ -64,6 +58,11 @@ fi
 # rcmaster-specific setup
 if [ "$hostname" = "rcmaster" ]; then
     cd /shome
+
+    # Get Mellanox OFED but do not install it during startup service
+    MLNX_OFED="MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64"
+    axel -n 4 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/$MLNX_OFED.tgz; \
+            tar xzf $MLNX_OFED.tgz &
 
     # Generate a list of machines in the cluster
     let num_nodes=$1-1
