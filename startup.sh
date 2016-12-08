@@ -1,8 +1,6 @@
-#!bin/bash
+#!/bin/bash
 
 # Assuming Ubuntu 14.04
-
-# What is the difference between `sudo bash startup.sh` and appending `sudo` in front of commands in this script?
 
 apt-get update
 # Install common utilities
@@ -45,7 +43,6 @@ done
 
 # Fix "rcmd: socket: Permission denied" when using pdsh
 echo ssh > /etc/pdsh/rcmd_default
-# TODO: Generate cluster hosts list for pdsh?
 
 # Load 8021q module
 echo 8021q >> /etc/modules
@@ -61,6 +58,14 @@ fi
 # rcmaster-specific setup
 if [ "$hostname" = "rcmaster" ]; then
     cd /shome
+
+    # Generate a list of machines in the cluster
+    let num_nodes=$1-1
+    > machines.txt
+    for i in $(seq "$num_nodes")
+    do
+        printf "rc%02d\n" $i >> machines.txt
+    done
 
     # Get Mellanox OFED
     wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz

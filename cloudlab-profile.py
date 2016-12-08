@@ -47,7 +47,8 @@ for name in node_names:
     node.addService(RSpec.Execute(
             shell="sh", command="sudo mv /local/CloudLab-scripts-master /local/scripts"))
     node.addService(RSpec.Execute(
-            shell="sh", command="sudo bash /local/scripts/startup.sh"))
+            shell="sh",
+            command="sudo /local/scripts/startup.sh %d" % params.num_nodes))
 
     rspec.addResource(node)
 
