@@ -13,12 +13,6 @@ apt-get --assume-yes install vim tmux pdsh tree
 # NFS
 apt-get --assume-yes install nfs-kernel-server nfs-common
 
-# MLNX OFED & DPDK
-# wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu14.04-x86_64.tgz
-# tar xzf MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
-# MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz/mlnxofedinstall --force --without-fw-update
-# wget http://www.mellanox.com/downloads/Drivers/MLNX_DPDK_2.2_4.2.tar.gz
-
 # Setup password-less ssh between nodes
 users="root `ls /users`"
 for user in $users; do
@@ -52,15 +46,28 @@ echo ssh > /etc/pdsh/rcmd_default
 # Load 8021q module
 echo 8021q >> /etc/modules
 
-# Setup NFS server and clients.
+# NFS server setup
 hostname=`hostname --short`
 if [ "$hostname" = "rcmaster" ]; then
-    /etc/init.d/nfs-kernel-server start
+    update-rc.d nfs-kernel-server enable
     mkdir /shome
     chmod 777 /shome
     echo "/shome *(rw,sync,no_root_squash)" >> /etc/exports
-else
-    mkdir /shome
-    mount rcmaster:/shome /shome
-    echo "rcmaster:/shome /shome nfs rw,sync,hard,intr 0 0" >> /etc/fstab
 fi
+
+# rcmaster-specific setup
+if [ "$hostname" = "rcmaster" ]; then
+    cd /shome
+
+    # Get Mellanox OFED
+    wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
+    tar xzf MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
+
+    # Get RAMCloud
+    git clone https://github.com/PlatformLab/RAMCloud.git
+    cd RAMCloud
+    git submodule update --init --recursive
+    ln -s ../../hooks/pre-commit .git/hooks/pre-commit
+    scripts/dpdkBuild.sh
+fi
+
