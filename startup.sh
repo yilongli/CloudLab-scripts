@@ -15,6 +15,12 @@ apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
         libssl-dev openjdk-8-jdk
 
+# Install Mellanox OFED
+MLNX_OFED="MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64"
+wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/$MLNX_OFED.tgz
+tar xzf $MLNX_OFED.tgz
+$MLNX_OFED/mlnxofedinstall --force --without-fw-update
+
 # Setup password-less ssh between nodes
 users="root `ls /users`"
 for user in $users; do
@@ -66,12 +72,6 @@ if [ "$hostname" = "rcmaster" ]; then
     do
         printf "rc%02d\n" $i >> machines.txt
     done
-
-    # Get Mellanox OFED
-    wget http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
-    tar xzf MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64.tgz
-    mv MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64 MLNX_OFED
-    MLNX_OFED/mlnxofedinstall --force --without-fw-update
 
     # Get RAMCloud
     git clone https://github.com/PlatformLab/RAMCloud.git
