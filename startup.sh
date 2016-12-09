@@ -48,6 +48,7 @@ echo ssh > /etc/pdsh/rcmd_default
 echo 8021q >> /etc/modules
 
 # Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
+# The changes will take effects after reboot.
 # m510 is not a NUMA machine.
 echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
 mkdir /mnt/huge
@@ -84,7 +85,7 @@ if [ "$hostname" = "rcmaster" ]; then
     cd RAMCloud
     git submodule update --init --recursive
     ln -s ../../hooks/pre-commit .git/hooks/pre-commit
-    scripts/dpdkBuild.sh
+    DPDK_PMD=MLX4 scripts/dpdkBuild.sh
 
     # Mark the end of the startup service
     > DONE.txt
