@@ -9,8 +9,8 @@ pdsh -R ssh -w ^/shome/machines.txt \
 
 # Install Mellanox OFED for the entire cluster (rcmaster & rcXX)
 MLNX_OFED="MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64"
-/shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update &
+sudo /shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update &
 pdsh -R ssh -w ^/shome/machines.txt \
-    "/shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update"
+    "sudo /shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update"
 
 # TODO: enable hugepage support
