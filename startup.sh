@@ -47,6 +47,13 @@ echo ssh > /etc/pdsh/rcmd_default
 # Load 8021q module at boot time
 echo 8021q >> /etc/modules
 
+# Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
+# m510 is not a NUMA machine.
+echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
+mkdir /mnt/huge
+chmod 777 /mnt/huge
+echo "nodev /mnt/huge hugetlbfs defaults 0 0" >> /etc/fstab
+
 # NFS server setup
 hostname=`hostname --short`
 if [ "$hostname" = "rcmaster" ]; then
