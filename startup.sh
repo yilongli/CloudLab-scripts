@@ -86,8 +86,5 @@ if [ "$hostname" = "rcmaster" ]; then
     git submodule update --init --recursive
     ln -s ../../hooks/pre-commit .git/hooks/pre-commit
     DPDK_PMD=MLX4 scripts/dpdkBuild.sh
-
-    # Mark the end of the startup service
-    > DONE.txt
 fi
 
