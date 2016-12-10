@@ -8,6 +8,11 @@ git submodule update --init --recursive
 ln -s ../../hooks/pre-commit .git/hooks/pre-commit
 DPDK_PMD=MLX4 scripts/dpdkBuild.sh
 
+# Generate local config file for clusterperf
+num_nodes=$(geni-get manifest | grep -o "<node " | wc -l)
+cp /local/scripts/localconfig.template scripts/localconfig.py
+sudo sed -i "s/#NUM_NODES#/$num_nodes/g" scripts/localconfig.py
+
 # TODO: HOW CAN WE START THIS SERVICE AT BOOT TIME
 sudo /etc/init.d/nfs-kernel-server start
 
