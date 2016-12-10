@@ -2,8 +2,8 @@
 
 # Assuming Ubuntu 14.04
 
-apt-get update
 # Install common utilities
+apt-get update
 apt-get --assume-yes install vim tmux pdsh tree axel
 
 # NFS
@@ -13,7 +13,7 @@ apt-get --assume-yes install nfs-kernel-server nfs-common
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev \
         libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
-        libssl-dev openjdk-8-jdk
+        libssl-dev default-jdk
 
 # Setup password-less ssh between nodes
 users="root `ls /users`"
