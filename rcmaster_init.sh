@@ -1,4 +1,13 @@
 #!/bin/bash
+
+# Get RAMCloud & DPDK
+cd /shome
+git clone https://github.com/PlatformLab/RAMCloud.git
+cd RAMCloud
+git submodule update --init --recursive
+ln -s ../../hooks/pre-commit .git/hooks/pre-commit
+DPDK_PMD=MLX4 scripts/dpdkBuild.sh
+
 # TODO: HOW CAN WE START THIS SERVICE AT BOOT TIME
 sudo /etc/init.d/nfs-kernel-server start
 

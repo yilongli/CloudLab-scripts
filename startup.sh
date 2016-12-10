@@ -79,12 +79,5 @@ if [ "$hostname" = "rcmaster" ]; then
     do
         printf "rc%02d\n" $i >> machines.txt
     done
-
-    # Get RAMCloud
-    git clone https://github.com/PlatformLab/RAMCloud.git
-    cd RAMCloud
-    git submodule update --init --recursive
-    ln -s ../../hooks/pre-commit .git/hooks/pre-commit
-    DPDK_PMD=MLX4 scripts/dpdkBuild.sh
 fi
 
