@@ -47,37 +47,37 @@ echo ssh > /etc/pdsh/rcmd_default
 # Load 8021q module at boot time
 echo 8021q >> /etc/modules
 
-# Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
-# The changes will take effects after reboot.
-# m510 is not a NUMA machine.
-echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
-mkdir /mnt/huge
-chmod 777 /mnt/huge
-echo "nodev /mnt/huge hugetlbfs defaults 0 0" >> /etc/fstab
-
-# NFS server setup
 hostname=`hostname --short`
-if [ "$hostname" = "rcmaster" ]; then
+if [ "$hostname" = "rcnfs" ]; then
     mkdir /shome
     chmod 777 /shome
     echo "/shome *(rw,sync,no_root_squash)" >> /etc/exports
-fi
 
-# rcmaster-specific setup
-if [ "$hostname" = "rcmaster" ]; then
-    cd /shome
+    # TODO: HOW TO START THE SERVICE AUTOMATICALLY AFTER REBOOT?
+    /etc/init.d/nfs-kernel-server start
 
     # Get Mellanox OFED but do not install it during startup service
+    cd /shome
     MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu14.04-x86_64"
     axel -n 4 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/$MLNX_OFED.tgz; \
             tar xzf $MLNX_OFED.tgz &
 
     # Generate a list of machines in the cluster
-    let num_nodes=$1-1
     > machines.txt
-    for i in $(seq "$num_nodes")
+    num_nodes=$1
+    for i in $(seq "$(($num_nodes-2))")
     do
         printf "rc%02d\n" $i >> machines.txt
     done
+    printf "rcmaster\n" >> machines.txt
+    printf "rcnfs\n" >> machines.txt
+else
+    # Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
+    # The changes will take effects after reboot.
+    # m510 is not a NUMA machine.
+    echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
+    mkdir /mnt/huge
+    chmod 777 /mnt/huge
+    echo "nodev /mnt/huge hugetlbfs defaults 0 0" >> /etc/fstab
 fi
 

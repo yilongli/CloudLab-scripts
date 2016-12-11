@@ -11,7 +11,7 @@ images = [ ("UBUNTU14-64-STD", "Ubuntu 14.04"),
 types  = [ ("m510", "m510 (Intel Xeon-D)"),
            ("d430", "d430 (Intel 2x10GbE)")]
 
-num_nodes = range(1, 22)
+num_nodes = range(2, 22)
 
 pc.defineParameter("image", "Disk Image",
                    portal.ParameterType.IMAGE, images[0], images)
@@ -20,7 +20,7 @@ pc.defineParameter("type", "Node Type",
                    portal.ParameterType.NODETYPE, types[0], types)
 
 pc.defineParameter("num_nodes", "# Nodes",
-                   portal.ParameterType.INTEGER, 1, num_nodes)
+                   portal.ParameterType.INTEGER, 2, num_nodes)
 
 params = pc.bindParameters()
 #pc.verifyParameters()
@@ -30,8 +30,8 @@ rspec = RSpec.Request()
 lan = RSpec.LAN()
 rspec.addResource(lan)
 
-node_names = ["rcmaster"]
-for i in range(params.num_nodes - 1):
+node_names = ["rcmaster", "rcnfs"]
+for i in range(params.num_nodes - 2):
     node_names.append("rc%02d" % (i + 1))
 
 for name in node_names:
@@ -52,10 +52,8 @@ for name in node_names:
 
     rspec.addResource(node)
 
-    if params.num_nodes > 1:
-        # TODO: I see no interface named eth0? only eno1 & eno1d1
-        iface = node.addInterface("eth0")
-        lan.addInterface(iface)
+    iface = node.addInterface("eth0")
+    lan.addInterface(iface)
 
 pc.printRequestRSpec(rspec)
 
