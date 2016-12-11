@@ -6,7 +6,7 @@ git clone https://github.com/PlatformLab/RAMCloud.git
 cd RAMCloud
 git submodule update --init --recursive
 ln -s ../../hooks/pre-commit .git/hooks/pre-commit
-DPDK_PMD=MLX4 scripts/dpdkBuild.sh
+/local/scripts/mlnxDpdkBuild.sh
 
 # Generate local config file for clusterperf
 num_nodes=$(geni-get manifest | grep -o "<node " | wc -l)

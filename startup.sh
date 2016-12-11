@@ -68,8 +68,8 @@ if [ "$hostname" = "rcmaster" ]; then
     cd /shome
 
     # Get Mellanox OFED but do not install it during startup service
-    MLNX_OFED="MLNX_OFED_LINUX-3.1-1.0.3-ubuntu14.04-x86_64"
-    axel -n 4 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.1-1.0.3/$MLNX_OFED.tgz; \
+    MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu14.04-x86_64"
+    axel -n 4 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/$MLNX_OFED.tgz; \
             tar xzf $MLNX_OFED.tgz &
 
     # Generate a list of machines in the cluster
