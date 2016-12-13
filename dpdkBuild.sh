@@ -10,7 +10,7 @@ then
     DPDK_VER="16.11"
     DPDK="dpdk-${DPDK_VER}"
     DPDK_SRC="http://dpdk.org/browse/dpdk/snapshot/${DPDK}.tar.gz"
-    DPDK_OPTIONS+="CONFIG_RTE_BUILD_SHARED_LIB=y"
+    DPDK_OPTIONS+=" CONFIG_RTE_BUILD_SHARED_LIB=y"
 else
     # Use MLNX_DPDK release.
     DPDK_VER="2.2_4.2"
@@ -18,7 +18,7 @@ else
     DPDK_SRC="http://www.mellanox.com/downloads/Drivers/${DPDK}.tar.gz"
     # MLX4 driver seems to have problems working with DPDK shared libraries
     # on the CloudLab m510 cluster.
-    DPDK_OPTIONS+="CONFIG_RTE_BUILD_SHARED_LIB=n"
+    DPDK_OPTIONS+=" CONFIG_RTE_BUILD_SHARED_LIB=n"
 fi
 
 if [ ! -d ./deps ]; then mkdir deps; fi
