@@ -428,8 +428,9 @@ class Cluster(object):
             numBackups = self.backups_started
         self.sandbox.checkFailures()
         try:
+            # TODO: `--dpdkPort -1` needs to be handled in RC source code?
             ensureCommand = ('%s -C %s -m %d -b %d -l 1 --wait %d '
-                             '--logFile %s/ensureServers.log' %
+                             '--logFile %s/ensureServers.log --dpdkPort -1' %
                              (ensure_servers_bin, self.coordinator_locator,
                              numMasters, numBackups, timeout,
                              self.log_subdir))
