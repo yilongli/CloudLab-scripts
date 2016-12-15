@@ -323,7 +323,7 @@ class Cluster(object):
                       self.log_subdir, self.next_server_id, host[0])
 
         command = ('%s %s -C %s -L %s -r %d -l %s --clusterName __unnamed__ '
-                   '--logFile %s.log --preferredIndex %d %s' %
+                   '--logFile %s.log --preferredIndex %d --dpdkPort -1 %s' %
                    (valgrind_command,
                     server_binary, self.coordinator_locator,
                     server_locator(self.transport, host, port),
