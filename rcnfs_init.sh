@@ -6,8 +6,7 @@ rcnfs=$(hostname -i)
 pdsh -R ssh -w ^/shome/machines.txt -x rcnfs \
     "sudo mkdir /shome; sudo mount -t nfs4 ${rcnfs}:/shome /shome;" \
     "NFS_CONFIG=\"${rcnfs}:/shome /shome nfs4 rw,sync,hard,intr," \
-    "clientAddr=\$(hostname -i) 0 0\"" \
-    "echo \${NFS_CONFIG} | sudo tee -a /etc/fstab;"
+    "addr=\$(hostname -i) 0 0\"; echo \${NFS_CONFIG} | sudo tee -a /etc/fstab"
 
 # Install Mellanox OFED for rcmaster & rcXX. The cluster must be rebooted to
 # work properly. Note: attempting to build MLNX DPDK before installing MLNX
