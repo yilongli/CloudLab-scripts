@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# NFS clients setup
+# NFS clients setup: use the publicly-routable IP addresses for both the server
+# and the clients to avoid interference with the experiment.
+rcnfs=$(hostname -i)
 pdsh -R ssh -w ^/shome/machines.txt -x rcnfs \
-    'sudo mkdir /shome; sudo mount rcnfs:/shome /shome;' \
-    'echo "rcnfs:/shome /shome nfs rw,sync,hard,intr 0 0" | sudo tee -a /etc/fstab;'
+    "sudo mkdir /shome; sudo mount -t nfs4 ${rcnfs}:/shome /shome;" \
+    "NFS_CONFIG=\"${rcnfs}:/shome /shome nfs4 rw,sync,hard,intr," \
+    "clientAddr=\$(hostname -i) 0 0\"" \
+    "echo \${NFS_CONFIG} | sudo tee -a /etc/fstab;"
 
 # Install Mellanox OFED for rcmaster & rcXX. The cluster must be rebooted to
 # work properly. Note: attempting to build MLNX DPDK before installing MLNX

@@ -2,6 +2,12 @@
 
 # Assuming Ubuntu 14.04
 
+# Test if startup service has run before.
+if [ -f /local/startup_service_done ]; then
+    exit 0
+fi
+> /local/startup_service_done
+
 # Install common utilities
 apt-get update
 apt-get --assume-yes install vim tmux pdsh tree axel
@@ -63,6 +69,7 @@ if [ "$hostname" = "rcnfs" ]; then
             tar xzf $MLNX_OFED.tgz &
 
     # Generate a list of machines in the cluster
+    # TODO: USE IP ADDRESSES?
     > machines.txt
     num_nodes=$1
     for i in $(seq "$(($num_nodes-2))")
