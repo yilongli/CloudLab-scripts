@@ -35,8 +35,8 @@ import time
 from optparse import OptionParser
 
 # Locations of various RAMCloud executables.
-coordinator_binary = 'sudo %s/coordinator' % config.hooks.get_remote_obj_path()
-server_binary = 'sudo %s/server' % config.hooks.get_remote_obj_path()
+coordinator_binary = 'sudo %s/coordinator --dpdkPort 1' % config.hooks.get_remote_obj_path()
+server_binary = 'sudo %s/server --dpdkPort 1' % config.hooks.get_remote_obj_path()
 ensure_servers_bin = 'sudo %s/apps/ensureServers' % config.hooks.get_remote_obj_path()
 
 # valgrind
@@ -323,7 +323,7 @@ class Cluster(object):
                       self.log_subdir, self.next_server_id, host[0])
 
         command = ('%s %s -C %s -L %s -r %d -l %s --clusterName __unnamed__ '
-                   '--logFile %s.log --preferredIndex %d --dpdkPort -1 %s' %
+                   '--logFile %s.log --preferredIndex %d %s' %
                    (valgrind_command,
                     server_binary, self.coordinator_locator,
                     server_locator(self.transport, host, port),
