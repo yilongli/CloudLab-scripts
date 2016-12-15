@@ -253,7 +253,7 @@ class Cluster(object):
                  self.log_level, self.log_subdir,
                  self.coordinator_host[0], args))
 
-            self.coordinator = self.sandbox.rsh(self.coordinator_host[0],
+            self.coordinator = self.sandbox.rsh(self.coordinator_host[1],
                         command, bg=True, stderr=subprocess.STDOUT)
         else:
             # currently hardcoding logcabin server because ankita's logcabin
@@ -266,7 +266,7 @@ class Cluster(object):
                  self.log_level, self.log_subdir,
                  self.coordinator_host[0], args))
 
-            self.coordinator = self.sandbox.rsh(self.coordinator_host[0],
+            self.coordinator = self.sandbox.rsh(self.coordinator_host[1],
                         command, bg=True, stderr=subprocess.STDOUT)
 
             # just wait for coordinator to start
@@ -278,7 +278,7 @@ class Cluster(object):
                                  self.coordinator_host[0],
                                  obj_path, self.coordinator_locator))
 
-            restarted_coord = self.sandbox.rsh(self.coordinator_host[0],
+            restarted_coord = self.sandbox.rsh(self.coordinator_host[1],
                         restart_command, kill_on_exit=True, bg=True,
                         stderr=subprocess.STDOUT)
 
@@ -357,14 +357,14 @@ class Cluster(object):
         stdout = open(log_prefix + '.out', 'w')
         stderr = open(log_prefix + '.err', 'w')
         if not kill_on_exit:
-            server = self.sandbox.rsh(host[0], command, is_server=True,
+            server = self.sandbox.rsh(host[1], command, is_server=True,
                                       locator=server_locator(self.transport,
                                                              host, port),
                                       kill_on_exit=False, bg=True,
                                       stdout=stdout,
                                       stderr=stderr)
         else:
-            server = self.sandbox.rsh(host[0], command, is_server=True,
+            server = self.sandbox.rsh(host[1], command, is_server=True,
                                       locator=server_locator(self.transport,
                                                              host, port),
                                       bg=True,
@@ -428,15 +428,14 @@ class Cluster(object):
             numBackups = self.backups_started
         self.sandbox.checkFailures()
         try:
-            # TODO: `--dpdkPort -1` needs to be handled in RC source code?
             ensureCommand = ('%s -C %s -m %d -b %d -l 1 --wait %d '
-                             '--logFile %s/ensureServers.log --dpdkPort -1' %
+                             '--logFile %s/ensureServers.log' %
                              (ensure_servers_bin, self.coordinator_locator,
                              numMasters, numBackups, timeout,
                              self.log_subdir))
             if self.verbose:
                 print("ensureServers command: %s" % ensureCommand)
-            self.sandbox.rsh(self.coordinator_host[0], ensureCommand)
+            self.sandbox.rsh(self.coordinator_host[1], ensureCommand)
         except:
             # prefer exceptions from dead processes to timeout error
             self.sandbox.checkFailures()
@@ -465,7 +464,7 @@ class Cluster(object):
                         i, self.log_subdir, self.next_client_id,
                         client_host[0], client_args))
             self.next_client_id += 1
-            clients.append(self.sandbox.rsh(client_host[0], command, bg=True))
+            clients.append(self.sandbox.rsh(client_host[1], command, bg=True))
             if self.verbose:
                 print('Client %d started on %s: %s' % (i, client_host[0],
                         command))
@@ -588,7 +587,7 @@ def run(
     """
     Start a coordinator and servers, as indicated by the arguments.  If a
     client is specified, then start one or more client processes and wait for
-    them to complete. Otherwise leave the cluster running.  
+    them to complete. Otherwise leave the cluster running.
     @return: string indicating the path to the log files for this run.
     """
 #    client_hosts = [('rc52', '192.168.1.152', 52)]
