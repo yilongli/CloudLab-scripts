@@ -65,6 +65,7 @@ coord_locator_templates = {
     'basic+udp-1g': 'basic+udp:host=%(host1g)s,port=%(port)d',
     'unreliable+udp': 'unreliable+udp:host=%(host)s,port=%(port)d',
     'infrc': 'infrc:host=%(host)s,port=%(port)d',
+    # TODO: revise this; coordinator also uses DPDK
     # Coordinator uses udp even when rest of cluster uses infud
     # or infeth.
     'basic+infud': 'basic+udp:host=%(host)s,port=%(port)d',
@@ -453,7 +454,7 @@ class Cluster(object):
         """
         num_clients = len(hosts)
         args = client.split(' ')
-        client_bin = args[0]
+        client_bin = args[0] + ' --dpdkPort 1'
         client_args = ' '.join(args[1:])
         clients = []
         for i, client_host in enumerate(hosts):
