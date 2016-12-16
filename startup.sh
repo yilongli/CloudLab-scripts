@@ -70,14 +70,14 @@ if [ "$hostname" = "rcnfs" ]; then
 
     # Generate a list of machines in the cluster
     # TODO: USE IP ADDRESSES?
-    > machines.txt
+    > rc-hosts.txt
     num_nodes=$1
     for i in $(seq "$(($num_nodes-2))")
     do
-        printf "rc%02d\n" $i >> machines.txt
+        printf "rc%02d\n" $i >> rc-hosts.txt
     done
-    printf "rcmaster\n" >> machines.txt
-    printf "rcnfs\n" >> machines.txt
+    printf "rcmaster\n" >> rc-hosts.txt
+    printf "rcnfs\n" >> rc-hosts.txt
 else
     # Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
     # The changes will take effects after reboot.
