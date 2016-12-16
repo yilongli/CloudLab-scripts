@@ -28,5 +28,4 @@ cp /local/scripts/common.py scripts/
 
 # Generate scripts/localconfig.py
 let num_rcXX=$(geni-get manifest | grep -o "<node " | wc -l)-2
-cp /local/scripts/localconfig.template scripts/localconfig.py
-sudo sed -i "s/#NUM_RCXX#/$num_rcXX/g" scripts/localconfig.py
+python /local/scripts/localconfigGen.py ${num_rcXX} > scripts/localconfig.py
