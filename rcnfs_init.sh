@@ -2,7 +2,8 @@
 
 # Get RAMCloud
 cd /shome
-git clone https://github.com/PlatformLab/RAMCloud.git
+#git clone https://github.com/PlatformLab/RAMCloud.git
+git clone https://github.com/yilongli/RAMCloud.git
 cd RAMCloud
 git submodule update --init --recursive
 ln -s ../../hooks/pre-commit .git/hooks/pre-commit
