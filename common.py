@@ -102,7 +102,7 @@ class Sandbox(object):
             else:
                 # Assumes scripts are at same path on remote machine
                 sh_command = ['ssh', host,
-                              '%s/regexec' % config.hooks.get_remote_scripts_path(),
+                              'sudo %s/regexec' % config.hooks.get_remote_scripts_path(),
                               sonce,
                               config.hooks.get_remote_wd(),
                               "'%s'" % command]
