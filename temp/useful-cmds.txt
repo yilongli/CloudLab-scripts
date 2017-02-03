@@ -1,0 +1,31 @@
+scripts/clusterperf.py --transport homa+dpdk --servers 1 --clients 1 --numBackupDisks 1 --disjunct --messageSizeCdfFile Facebook_HadoopDist_All.txt --seconds 30 --loadFactor 0.50 --verbose echo_workload
+
+scripts/clusterperf.py --transport homa+dpdk --servers 1 --clients 1 --numBackupDisks 1 --disjunct --messageSizeCdfFile Facebook_HadoopDist_All.txt --seconds 20 --loadFactor 0.2 --verbose echo_workload
+
+yilongl@rc03:/shome/RAMCloud/logs/latest$ cat client*.log | grep '@ ' > raw.txt
+
+yilongl@rc02:/shome/RAMCloud/logs/latest$ cd ../latest; cat client*.log | grep 'load factor'
+
+yilongl@rc03:/shome/experiment-data$ ./process-workload-logs.py facebookHadoop/baseline_rtt.txt facebookHadoop/10x10_30s_50pct.txt > result.txt
+
+sed -n '163820,164080p' client1.ms0816.log  > debug.txt
+
+watch -d -n 0.1 cat /proc/interrupts
+watch -d -n 1 "cat /proc/interrupts | egrep 'LOC|CPU'"
+
+http://www.brendangregg.com/perf.html
+
+sudo perf record -e page-faults -C 2 --call-graph dwarf
+sudo perf script
+sudo perf report
+
+sudo trace-cmd record -p function_graph -P `pgrep ClusterPerf`
+sudo trace-cmd report > ff.txt
+grep '|  [a-zA-Z0-9]' -nH ff.txt > fff.txt
+cat fff.txt | cut -d'|' -f2 | sort | uniq -c
+
+https://github.com/epickrram/perf-workshop/blob/master/src/main/shell/set_cpu_governor.sh
+
+# it contains script to achieve nohz_full
+git://git.kernel.org/pub/scm/linux/kernel/git/frederic/dynticks-testing.git
+

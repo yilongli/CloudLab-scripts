@@ -1,0 +1,2 @@
+sudo  /shome/RAMCloud/obj.master/apps/ClusterPerf --dpdkPort 1 -C basic+udp:host=128.110.153.238,port=12246 --numClients 1 --clientIndex 0 --logFile logs/20161215223901/client1.ms1127
+log --workload YCSB-A --size 100 basic

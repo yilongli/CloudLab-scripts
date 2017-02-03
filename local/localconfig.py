@@ -1,0 +1,1 @@
+hosts = [('node-0.anirajk-QV19126.RAMCloud.emulab.net', '155.98.36.147', 1), ('node-1.anirajk-QV19126.RAMCloud.emulab.net', '155.98.36.140', 2), ('node-2.anirajk-QV19126.RAMCloud.emulab.net', '155.98.36.153', 3), ('node-3.anirajk-QV19126.RAMCloud.emulab.net', '155.98.36.156', 4)]

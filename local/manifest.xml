@@ -1,0 +1,80 @@
+<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jacks="http://www.protogeni.net/resources/rspec/ext/jacks/1" xmlns:client="http://www.protogeni.net/resources/rspec/ext/client/1" xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" xmlns="http://www.geni.net/resources/rspec/3" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/manifest.xsd" type="manifest">
+  <rspec_tour xmlns="http://www.protogeni.net/resources/rspec/ext/apt-tour/1">
+    <description type="text">A RAMCloud cluster with configurable number of nodes and hardware types.</description>
+    <instructions type="markdown">The profile could be used on 10Gbe cards with DPDK as well as Infiniband hardware.
+The following Instructions enumerate the d430 boxes on DPDK.
+* Run `bash /local/setup_ssh.sh` on all the nodes to get passwordless ssh access between nodes 
+* Use `python /local/generate_config.py` to generate configs. 
+* Run `bash /local/setup_nfs_server.sh` on node-0 to setup an nfs server 
+* Run `bash /local/setup_disks.sh`
+* Run `bash /local/update_build_dpdk.sh` to get the latest build and build it with DPDK support.
+* Run `bash /local/configure_dpdk_d430.sh` to configure the 10Gbe interface with DPDK
+* Run `bash /local/configure.sh` to set up the experiment. 
+* Inside /local/RAMCloud, Run the basic testsuite as follows 
+  * `python scripts/clusterperf.py --transport basic+dpdk basic --logDir /local/ramcloud_shared &gt; /local/infrc_basic_results.out 2&gt;/local/infrc_basic_results.err`
+</instructions>
+  </rspec_tour>
+  <node xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" client_id="node-0" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm" component_id="urn:publicid:IDN+emulab.net+node+pc847" sliver_id="urn:publicid:IDN+emulab.net+sliver+286378">
+    <sliver_type name="raw-pc">
+      <disk_image name=" https://www.emulab.net/image_metadata.php?uuid=c4c56413-8ca5-11e6-ac8c-90e2ba22fee4"/>
+    </sliver_type>
+    <hardware_type name="d430"/>
+    <interface client_id="node-0:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc847:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286384" mac_address="3cfdfe049042">
+      <ip address="10.0.1.1" netmask="255.255.255.0" type="ipv4"/>
+    </interface>
+    <services>
+      <execute shell="bash" command="/local/setup_ssh.sh"/>
+    <login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="anirajk"/><login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="drushton"/><login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="stutsman"/><login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="behnammn"/><login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="cstlee"/><login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="chinmayk"/><login authentication="ssh-keys" hostname="pc847.emulab.net" port="22" username="yilongl"/><emulab:console server="boss.emulab.net"/></services>
+  <emulab:vnode name="pc847" hardware_type="d430"/><host name="node-0.anirajk-QV19126.RAMCloud.emulab.net" ipv4="155.98.36.147"/></node>
+  <node xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" client_id="node-1" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm" component_id="urn:publicid:IDN+emulab.net+node+pc840" sliver_id="urn:publicid:IDN+emulab.net+sliver+286379">
+    <sliver_type name="raw-pc">
+      <disk_image name=" https://www.emulab.net/image_metadata.php?uuid=c4c56413-8ca5-11e6-ac8c-90e2ba22fee4"/>
+    </sliver_type>
+    <hardware_type name="d430"/>
+    <interface client_id="node-1:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc840:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286385" mac_address="3cfdfe049be2">
+      <ip address="10.0.1.2" netmask="255.255.255.0" type="ipv4"/>
+    </interface>
+    <services>
+      <execute shell="bash" command="/local/setup_ssh.sh"/>
+    <login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="anirajk"/><login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="drushton"/><login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="stutsman"/><login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="behnammn"/><login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="cstlee"/><login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="chinmayk"/><login authentication="ssh-keys" hostname="pc840.emulab.net" port="22" username="yilongl"/><emulab:console server="boss.emulab.net"/></services>
+  <emulab:vnode name="pc840" hardware_type="d430"/><host name="node-1.anirajk-QV19126.RAMCloud.emulab.net" ipv4="155.98.36.140"/></node>
+  <node xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" client_id="node-2" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm" component_id="urn:publicid:IDN+emulab.net+node+pc853" sliver_id="urn:publicid:IDN+emulab.net+sliver+286381">
+    <sliver_type name="raw-pc">
+      <disk_image name=" https://www.emulab.net/image_metadata.php?uuid=c4c56413-8ca5-11e6-ac8c-90e2ba22fee4"/>
+    </sliver_type>
+    <hardware_type name="d430"/>
+    <interface client_id="node-2:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc853:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286386" mac_address="3cfdfe04c1e2">
+      <ip address="10.0.1.3" netmask="255.255.255.0" type="ipv4"/>
+    </interface>
+    <services>
+      <execute shell="bash" command="/local/setup_ssh.sh"/>
+    <login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="anirajk"/><login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="drushton"/><login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="stutsman"/><login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="behnammn"/><login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="cstlee"/><login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="chinmayk"/><login authentication="ssh-keys" hostname="pc853.emulab.net" port="22" username="yilongl"/><emulab:console server="boss.emulab.net"/></services>
+  <emulab:vnode name="pc853" hardware_type="d430"/><host name="node-2.anirajk-QV19126.RAMCloud.emulab.net" ipv4="155.98.36.153"/></node>
+  <node xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" client_id="node-3" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm" component_id="urn:publicid:IDN+emulab.net+node+pc856" sliver_id="urn:publicid:IDN+emulab.net+sliver+286380">
+    <sliver_type name="raw-pc">
+      <disk_image name=" https://www.emulab.net/image_metadata.php?uuid=c4c56413-8ca5-11e6-ac8c-90e2ba22fee4"/>
+    </sliver_type>
+    <hardware_type name="d430"/>
+    <interface client_id="node-3:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc856:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286387" mac_address="3cfdfe04ab02">
+      <ip address="10.0.1.4" netmask="255.255.255.0" type="ipv4"/>
+    </interface>
+    <services>
+      <execute shell="bash" command="/local/setup_ssh.sh"/>
+    <login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="anirajk"/><login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="drushton"/><login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="stutsman"/><login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="behnammn"/><login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="cstlee"/><login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="chinmayk"/><login authentication="ssh-keys" hostname="pc856.emulab.net" port="22" username="yilongl"/><emulab:console server="boss.emulab.net"/></services>
+  <emulab:vnode name="pc856" hardware_type="d430"/><host name="node-3.anirajk-QV19126.RAMCloud.emulab.net" ipv4="155.98.36.156"/></node>
+  <link client_id="link-0" sliver_id="urn:publicid:IDN+emulab.net+sliver+286383" vlantag="148">
+    <interface_ref client_id="node-0:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc847:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286384"/>
+    <interface_ref client_id="node-1:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc840:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286385"/>
+    <interface_ref client_id="node-2:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc853:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286386"/>
+    <interface_ref client_id="node-3:if1" component_id="urn:publicid:IDN+emulab.net+interface+pc856:eth1" sliver_id="urn:publicid:IDN+emulab.net+sliver+286387"/>
+    <link_type name="lan"/>
+    <property source_id="node-0:if1" dest_id="link-0" capacity="10000000"/>
+    <property source_id="node-1:if1" dest_id="link-0" capacity="10000000"/>
+    <property source_id="node-2:if1" dest_id="link-0" capacity="10000000"/>
+    <property source_id="node-3:if1" dest_id="link-0" capacity="10000000"/>
+  <component_manager name="urn:publicid:IDN+emulab.net+authority+cm"/></link>
+  <data_set xmlns="http://www.protogeni.net/resources/rspec/ext/user-data/1">
+    <data_item name="emulab.net.parameter.node_type">d430</data_item>
+    <data_item name="emulab.net.parameter.num_nodes">4</data_item>
+  </data_set>
+<rs:site_info xmlns:rs="http://www.protogeni.net/resources/rspec/ext/site-info/1"><rs:location country="US" latitude="40.768652" longitude="-111.84581"/></rs:site_info></rspec>
