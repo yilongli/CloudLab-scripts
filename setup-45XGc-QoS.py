@@ -1,11 +1,11 @@
 #!usr/bin/python
-import comware
+#import comware
 
 # Enter system view
 cmds = ["system-view ;"]
 
 # Configure global priority maps
-cmds.append("qos map-table dot1p-lp ;import 0 export 0 ;import 1 export 1 ;import 2 export 2 ;")
+cmds.append("qos map-table dot1p-lp ;import 0 export 1 ;import 1 export 0 ;import 2 export 2 ;")
 # TODO: configure dot1p-drop table too?
 
 # Configure each 10Gb interface

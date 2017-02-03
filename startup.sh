@@ -19,7 +19,9 @@ apt-get --assume-yes install nfs-kernel-server nfs-common
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev \
         libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
-        libssl-dev default-jdk
+        libssl-dev default-jdk ccache
+
+# TODO: need at least gcc 4.9.X to pass RAMCloud unit tests
 
 # Setup password-less ssh between nodes
 users="root `ls /users`"
@@ -55,7 +57,8 @@ echo 8021q >> /etc/modules
 
 hostname=`hostname --short`
 if [ "$hostname" = "rcnfs" ]; then
-    mkdir /shome
+    # In `cloudlab-profile.py`, we already asked for a temporary file system
+    # mounted at /shome.
     chmod 777 /shome
     echo "/shome *(rw,sync,no_root_squash)" >> /etc/exports
 

@@ -1,3 +1,7 @@
+"""
+Reserve an entire chassis worth of machines at Utah for RAMCloud evaluation
+"""
+
 import geni.portal as portal
 import geni.rspec.pg as RSpec
 import geni.urn as urn
@@ -8,10 +12,9 @@ pc = portal.Context()
 images = [ ("UBUNTU14-64-STD", "Ubuntu 14.04"),
            ("UBUNTU16-64-STD", "Ubuntu 16.04")]
 
-types  = [ ("m510", "m510 (Intel Xeon-D)"),
-           ("d430", "d430 (Intel 2x10GbE)")]
+types  = [ ("m510", "m510 (Intel Xeon-D)")]
 
-num_nodes = range(2, 22)
+chassis = range(1,13+1)
 
 pc.defineParameter("image", "Disk Image",
                    portal.ParameterType.IMAGE, images[0], images)
@@ -19,32 +22,46 @@ pc.defineParameter("image", "Disk Image",
 pc.defineParameter("type", "Node Type",
                    portal.ParameterType.NODETYPE, types[0], types)
 
-pc.defineParameter("num_nodes", "# Nodes",
-                   portal.ParameterType.INTEGER, 2, num_nodes)
+pc.defineParameter("chassis", "Which chassis to request",
+                   portal.ParameterType.INTEGER,1,chassis)
+
+pc.defineParameter("skip", "Comma-separated list of nodes to skip",
+                   portal.ParameterType.STRING,"")
 
 params = pc.bindParameters()
-#pc.verifyParameters()
 
 rspec = RSpec.Request()
 
 lan = RSpec.LAN()
 rspec.addResource(lan)
 
-node_names = ["rcmaster", "rcnfs"]
-for i in range(params.num_nodes - 2):
-    node_names.append("rc%02d" % (i + 1))
+skiplist = params.skip.split(",")
 
-for name in node_names:
-    node = RSpec.RawPC(name)
+num_nodes = 45 - len(skiplist)
 
-    if name == "rcnfs":
+rc_aliases = ["rcmaster", "rcnfs"]
+for i in range(num_nodes - 2):
+    rc_aliases.append("rc%02d" % (i + 1))
+
+n = 0
+for i in range(1, num_nodes + 1):
+    name = "ms%02d%02d" % (params.chassis, i)
+
+    if name in skiplist:
+        continue
+
+    rc_alias = rc_aliases[n]
+    node = RSpec.RawPC(rc_alias)
+    n = n + 1
+
+    if rc_alias == "rcnfs":
         # Ask for a 256GB file system mounted at /shome on rcnfs
         bs = node.Blockstore("bs", "/shome")
         bs.size = "256GB"
 
     node.hardware_type = params.type
     node.disk_image = urn.Image(cloudlab.Utah,"emulab-ops:%s" % params.image)
-#    node.component_id = urn.Node(cloudlab.Utah, name)
+    node.component_id = urn.Node(cloudlab.Utah, name)
 
     node.addService(RSpec.Install(
             url="https://github.com/yilongli/CloudLab-scripts/archive/master.tar.gz",
@@ -53,7 +70,7 @@ for name in node_names:
             shell="sh", command="sudo mv /local/CloudLab-scripts-master /local/scripts"))
     node.addService(RSpec.Execute(
             shell="sh",
-            command="sudo /local/scripts/startup.sh %d" % params.num_nodes))
+            command="sudo /local/scripts/startup.sh %d" % num_nodes))
 
     rspec.addResource(node)
 
@@ -61,4 +78,3 @@ for name in node_names:
     lan.addInterface(iface)
 
 pc.printRequestRSpec(rspec)
-
