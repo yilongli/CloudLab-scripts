@@ -40,7 +40,7 @@ for name in node_names:
     if name == "rcnfs":
         # Ask for a 256GB file system mounted at /shome on rcnfs
         bs = node.Blockstore("bs", "/shome")
-        bs.size = "256GB"
+        bs.size = "200GB"
 
     node.hardware_type = params.type
     node.disk_image = urn.Image(cloudlab.Utah,"emulab-ops:%s" % params.image)

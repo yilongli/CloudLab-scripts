@@ -21,6 +21,10 @@ apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
         libssl-dev default-jdk ccache
 
+# Install numpy, scipy, matplotlib and docopt
+apt-get --assume-yes install python-numpy python-scipy python-docopt \
+        python-matplotlib
+
 # TODO: need at least gcc 4.9.X to pass RAMCloud unit tests
 
 # Setup password-less ssh between nodes
@@ -89,5 +93,12 @@ else
     mkdir /mnt/huge
     chmod 777 /mnt/huge
     echo "nodev /mnt/huge hugetlbfs defaults 0 0" >> /etc/fstab
+
+    # Enable cpuset functionality if it's not been done yet.
+    if [ ! -d "/sys/fs/cgroup/cpuset" ]; then
+        mount -t tmpfs cgroup_root /sys/fs/cgroup
+        mkdir /sys/fs/cgroup/cpuset
+        mount -t cgroup cpuset -o cpuset /sys/fs/cgroup/cpuset/
+    fi
 fi
 
