@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# Assuming Ubuntu 14.04
+# !!! Assuming machine type m510 !!!
 
 # Test if startup service has run before.
 if [ -f /local/startup_service_done ]; then
     exit 0
 fi
-> /local/startup_service_done
 
 # Install common utilities
 apt-get update
@@ -28,8 +27,6 @@ apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
 # Install numpy, scipy, matplotlib and docopt
 apt-get --assume-yes install python-numpy python-scipy python-docopt \
         python-matplotlib
-
-# TODO: need at least gcc 4.9.X to pass RAMCloud unit tests
 
 # Setup password-less ssh between nodes
 users="root `ls /users`"
@@ -60,8 +57,9 @@ done
 # Fix "rcmd: socket: Permission denied" when using pdsh
 echo ssh > /etc/pdsh/rcmd_default
 
-# Load 8021q module at boot time
-echo 8021q >> /etc/modules
+# Variables
+OS_VER="ubuntu`lsb_release -r | cut -d":" -f2 | xargs`"
+MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-$OS_VER-x86_64"
 
 hostname=`hostname --short`
 if [ "$hostname" = "rcnfs" ]; then
@@ -73,14 +71,12 @@ if [ "$hostname" = "rcnfs" ]; then
     # TODO: HOW TO START THE SERVICE AUTOMATICALLY AFTER REBOOT?
     /etc/init.d/nfs-kernel-server start
 
-    # Get Mellanox OFED but do not install it during startup service
+    # Download Mellanox OFED package
     cd /shome
-    MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu14.04-x86_64"
     axel -n 4 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/$MLNX_OFED.tgz; \
             tar xzf $MLNX_OFED.tgz &
 
     # Generate a list of machines in the cluster
-    # TODO: USE IP ADDRESSES?
     > rc-hosts.txt
     num_nodes=$1
     for i in $(seq "$(($num_nodes-2))")
@@ -89,6 +85,19 @@ if [ "$hostname" = "rcnfs" ]; then
     done
     printf "rcmaster\n" >> rc-hosts.txt
     printf "rcnfs\n" >> rc-hosts.txt
+
+    # Get RAMCloud
+    git clone https://github.com/PlatformLab/RAMCloud.git
+    cd RAMCloud
+    git submodule update --init --recursive
+    ln -s ../../hooks/pre-commit .git/hooks/pre-commit
+
+    # Generate scripts/localconfig.py
+    let num_rcXX=$(geni-get manifest | grep -o "<node " | wc -l)-2
+    python /local/scripts/localconfigGen.py ${num_rcXX} > scripts/localconfig.py
+
+    # Mark the startup service has finished
+    > /local/startup_service_done
 else
     # Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
     # The changes will take effects after reboot.
@@ -104,5 +113,37 @@ else
         mkdir /sys/fs/cgroup/cpuset
         mount -t cgroup cpuset -o cpuset /sys/fs/cgroup/cpuset/
     fi
+
+    # Wait until rcnfs is ready
+    echo "Waiting for rcnfs to finish startup service..."
+    while [ `ssh rcnfs "[ -f /local/startup_service_done ] && echo 1 || echo 0"` = "0" ]; do
+        sleep 1
+    done
+
+    # NFS clients setup: use the publicly-routable IP addresses for both the server
+    # and the clients to avoid interference with the experiment.
+    rcnfs_ip=`ssh rcnfs "hostname -i"`
+    mkdir /shome; mount -t nfs4 $rcnfs_ip:/shome /shome
+    echo "$rcnfs_ip:/shome /shome nfs4 rw,sync,hard,intr,addr=`hostname -i` 0 0" >> /etc/fstab
+
+    # TODO: SCALING GOVERNOR
+    # https://github.com/epickrram/perf-workshop/blob/master/src/main/shell/set_cpu_governor.sh
+    # or the following after reboot
+    # sudo cpupower frequency-set -g performance
+
+    # Configure 4 cores to be in adaptive-ticks mode (need reboot to take effect)
+    grub-install /dev/nvme0n1
+    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"nohz_full=2-5 rcu_nocbs=2-5\"" >> /etc/default/grub
+    update-grub
+
+    # Install Mellanox OFED (need reboot to work properly). Note: attempting to build
+    # MLNX DPDK before installing MLNX OFED may result in compile-time errors.
+    /shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update
+
+    # Mark the startup service has finished
+    > /local/startup_service_done
+
+    # Reboot to let the configuration take effects
+    reboot
 fi
 
