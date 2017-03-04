@@ -60,6 +60,7 @@ echo ssh > /etc/pdsh/rcmd_default
 # Variables
 OS_VER="ubuntu`lsb_release -r | cut -d":" -f2 | xargs`"
 MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-$OS_VER-x86_64"
+# TODO: extract "/shome"
 
 hostname=`hostname --short`
 if [ "$hostname" = "rcnfs" ]; then
@@ -73,28 +74,18 @@ if [ "$hostname" = "rcnfs" ]; then
 
     # Download Mellanox OFED package
     cd /shome
-    axel -n 4 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/$MLNX_OFED.tgz; \
-            tar xzf $MLNX_OFED.tgz &
+    axel -n 8 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/$MLNX_OFED.tgz
+    tar xzf $MLNX_OFED.tgz
 
     # Generate a list of machines in the cluster
     > rc-hosts.txt
-    num_nodes=$1
-    for i in $(seq "$(($num_nodes-2))")
+    let num_rcxx=$(geni-get manifest | grep -o "<node " | wc -l)-2
+    for i in $(seq "$num_rcxx")
     do
         printf "rc%02d\n" $i >> rc-hosts.txt
     done
     printf "rcmaster\n" >> rc-hosts.txt
     printf "rcnfs\n" >> rc-hosts.txt
-
-    # Get RAMCloud
-    git clone https://github.com/PlatformLab/RAMCloud.git
-    cd RAMCloud
-    git submodule update --init --recursive
-    ln -s ../../hooks/pre-commit .git/hooks/pre-commit
-
-    # Generate scripts/localconfig.py
-    let num_rcXX=$(geni-get manifest | grep -o "<node " | wc -l)-2
-    python /local/scripts/localconfigGen.py ${num_rcXX} > scripts/localconfig.py
 
     # Mark the startup service has finished
     > /local/startup_service_done
@@ -116,7 +107,7 @@ else
 
     # Wait until rcnfs is ready
     echo "Waiting for rcnfs to finish startup service..."
-    while [ `ssh rcnfs "[ -f /local/startup_service_done ] && echo 1 || echo 0"` = "0" ]; do
+    while [ "$(ssh rcnfs "[ -f /local/startup_service_done ] && echo 1 || echo 0")" != "1" ]; do
         sleep 1
     done
 
@@ -129,7 +120,7 @@ else
     # TODO: SCALING GOVERNOR
     # https://github.com/epickrram/perf-workshop/blob/master/src/main/shell/set_cpu_governor.sh
     # or the following after reboot
-    # sudo cpupower frequency-set -g performance
+    # cpupower frequency-set -g performance
 
     # Configure 4 cores to be in adaptive-ticks mode (need reboot to take effect)
     grub-install /dev/nvme0n1
