@@ -15,6 +15,10 @@ apt-get --assume-yes install mosh vim tmux pdsh tree axel
 # NFS
 apt-get --assume-yes install nfs-kernel-server nfs-common
 
+# cpupower, etc.
+kernel_release=`uname -r`
+apt-get --assume-yes install linux-tools-common linux-tools-${kernel_release}
+
 # Install RAMCloud dependencies
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev \

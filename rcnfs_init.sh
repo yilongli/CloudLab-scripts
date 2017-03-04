@@ -18,7 +18,7 @@ python /local/scripts/localconfigGen.py ${num_rcXX} > scripts/localconfig.py
 # NFS clients setup: use the publicly-routable IP addresses for both the server
 # and the clients to avoid interference with the experiment.
 rcnfs=$(hostname -i)
-pdsh -R ssh -w ^/shome/rc-hosts.txt -x rcnfs \
+pdsh -R ssh -f 64 -w ^/shome/rc-hosts.txt -x rcnfs \
     "sudo mkdir /shome; sudo mount -t nfs4 ${rcnfs}:/shome /shome;" \
     "NFS_CONFIG=\"${rcnfs}:/shome /shome nfs4 rw,sync,hard,intr," \
     "addr=\$(hostname -i) 0 0\"; echo \${NFS_CONFIG} | sudo tee -a /etc/fstab"
@@ -32,11 +32,13 @@ pdsh -R ssh -w ^/shome/rc-hosts.txt -x rcnfs \
 
 # TODO: SCALING GOVERNOR
 # https://github.com/epickrram/perf-workshop/blob/master/src/main/shell/set_cpu_governor.sh
+# or the following after reboot
+# sudo cpupower frequency-set -g performance
 
 # Install Mellanox OFED for rcmaster & rcXX. The cluster must be rebooted to
 # work properly. Note: attempting to build MLNX DPDK before installing MLNX
 # OFED may result in compile-time errors.
 MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-ubuntu14.04-x86_64"
-pdsh -R ssh -w ^/shome/rc-hosts.txt -x rcnfs \
+pdsh -R ssh -f 64 -w ^/shome/rc-hosts.txt -x rcnfs \
     "sudo /shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update;" \
     "sudo reboot"
