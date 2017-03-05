@@ -38,7 +38,7 @@ for name in node_names:
     node = RSpec.RawPC(name)
 
     if name == "rcnfs":
-        # Ask for a 256GB file system mounted at /shome on rcnfs
+        # Ask for a 200GB file system mounted at /shome on rcnfs
         bs = node.Blockstore("bs", "/shome")
         bs.size = "200GB"
 

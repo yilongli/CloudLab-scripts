@@ -2,8 +2,35 @@
 
 # !!! Assuming machine type m510 !!!
 
+# Variables
+OS_VER="ubuntu`lsb_release -r | cut -d":" -f2 | xargs`"
+MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-$OS_VER-x86_64"
+SHARED_HOME="/shome"
+USERS="root `ls /users`"
+
 # Test if startup service has run before.
 if [ -f /local/startup_service_done ]; then
+    # Configurations that need to be (re)done after each reboot
+
+    # Set CPU scaling governor to "performance"
+    # (Note: somehow the effect doesn't persist without `sudo`)
+    sudo cpupower frequency-set -g performance
+
+    # Sometimes (e.g. after each experiment extension) the CloudLab management
+    # software will replace our authorized_keys settings; restore our settings
+    # automatically after reboot.
+    for user in $USERS; do
+        if [ "$user" = "root" ]; then
+            ssh_dir=/root/.ssh
+        else
+            ssh_dir=/users/$user/.ssh
+        fi
+
+        if [ -f $ssh_dir/authorized_keys.old ]; then
+            mv $ssh_dir/authorized_keys.old $ssh_dir/authorized_keys
+        fi
+    done
+
     exit 0
 fi
 
@@ -29,8 +56,7 @@ apt-get --assume-yes install python-numpy python-scipy python-docopt \
         python-matplotlib
 
 # Setup password-less ssh between nodes
-users="root `ls /users`"
-for user in $users; do
+for user in $USERS; do
     if [ "$user" = "root" ]; then
         ssh_dir=/root/.ssh
     else
@@ -57,23 +83,18 @@ done
 # Fix "rcmd: socket: Permission denied" when using pdsh
 echo ssh > /etc/pdsh/rcmd_default
 
-# Variables
-OS_VER="ubuntu`lsb_release -r | cut -d":" -f2 | xargs`"
-MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-$OS_VER-x86_64"
-# TODO: extract "/shome"
-
 hostname=`hostname --short`
 if [ "$hostname" = "rcnfs" ]; then
     # In `cloudlab-profile.py`, we already asked for a temporary file system
     # mounted at /shome.
-    chmod 777 /shome
-    echo "/shome *(rw,sync,no_root_squash)" >> /etc/exports
+    chmod 777 $SHARED_HOME
+    echo "$SHARED_HOME *(rw,sync,no_root_squash)" >> /etc/exports
 
     # TODO: HOW TO START THE SERVICE AUTOMATICALLY AFTER REBOOT?
     /etc/init.d/nfs-kernel-server start
 
     # Download Mellanox OFED package
-    cd /shome
+    cd $SHARED_HOME
     axel -n 8 -q http://www.mellanox.com/downloads/ofed/MLNX_OFED-3.4-1.0.0.0/$MLNX_OFED.tgz
     tar xzf $MLNX_OFED.tgz
 
@@ -114,22 +135,17 @@ else
     # NFS clients setup: use the publicly-routable IP addresses for both the server
     # and the clients to avoid interference with the experiment.
     rcnfs_ip=`ssh rcnfs "hostname -i"`
-    mkdir /shome; mount -t nfs4 $rcnfs_ip:/shome /shome
-    echo "$rcnfs_ip:/shome /shome nfs4 rw,sync,hard,intr,addr=`hostname -i` 0 0" >> /etc/fstab
+    mkdir $SHARED_HOME; mount -t nfs4 $rcnfs_ip:$SHARED_HOME $SHARED_HOME
+    echo "$rcnfs_ip:$SHARED_HOME $SHARED_HOME nfs4 rw,sync,hard,intr,addr=`hostname -i` 0 0" >> /etc/fstab
 
-    # TODO: SCALING GOVERNOR
-    # https://github.com/epickrram/perf-workshop/blob/master/src/main/shell/set_cpu_governor.sh
-    # or the following after reboot
-    # cpupower frequency-set -g performance
-
-    # Configure 4 cores to be in adaptive-ticks mode (need reboot to take effect)
+    # Configure some cores to be in adaptive-ticks mode (need reboot to take effect)
     grub-install /dev/nvme0n1
     echo "GRUB_CMDLINE_LINUX_DEFAULT=\"nohz_full=2-5 rcu_nocbs=2-5\"" >> /etc/default/grub
     update-grub
 
     # Install Mellanox OFED (need reboot to work properly). Note: attempting to build
     # MLNX DPDK before installing MLNX OFED may result in compile-time errors.
-    /shome/$MLNX_OFED/mlnxofedinstall --force --without-fw-update
+    $SHARED_HOME/$MLNX_OFED/mlnxofedinstall --force --without-fw-update
 
     # Mark the startup service has finished
     > /local/startup_service_done

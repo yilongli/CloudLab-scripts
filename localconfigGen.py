@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # This file generates the CloudLab cluster configuration, which will be
 # automatically included by config.py.
 
