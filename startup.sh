@@ -7,14 +7,22 @@ OS_VER="ubuntu`lsb_release -r | cut -d":" -f2 | xargs`"
 MLNX_OFED="MLNX_OFED_LINUX-3.4-1.0.0.0-$OS_VER-x86_64"
 SHARED_HOME="/shome"
 USERS="root `ls /users`"
+NUM_CPUS=$(lscpu -p=cpu | grep '[0-9]' | wc -l)
 
 # Test if startup service has run before.
 if [ -f /local/startup_service_done ]; then
     # Configurations that need to be (re)done after each reboot
 
+    # Disabled hyperthreading by forcing cores 8 .. 15 offline
+    for N in $(seq $((NUM_CPUS/2)) $((NUM_CPUS-1))); do
+        echo 0 > /sys/devices/system/cpu/cpu$N/online
+    done
+
     # Set CPU scaling governor to "performance"
-    # (Note: somehow the effect doesn't persist without `sudo`)
-    sudo cpupower frequency-set -g performance
+    # Note: the effect `cpupower frequency-set -g performance` doesn't seem to persist?
+    for N in $(seq 0 $((NUM_CPUS/2-1)))); do
+        echo performance > /sys/devices/system/cpu/cpu$N/cpufreq/scaling_governor
+    done
 
     # Sometimes (e.g. after each experiment extension) the CloudLab management
     # software will replace our authorized_keys settings; restore our settings
@@ -112,9 +120,11 @@ if [ "$hostname" = "rcnfs" ]; then
     > /local/startup_service_done
 else
     # Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
-    # The changes will take effects after reboot.
-    # m510 is not a NUMA machine.
-    echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
+    # The changes will take effects after reboot. m510 is not a NUMA machine.
+    # Reserve 1GB hugepages via kernel boot parameters
+    kernel_boot_params+="hugepagesz=1G hugepages=4"
+    # Or, 2MB hugepages after the system boots
+    # echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
     mkdir /mnt/huge
     chmod 777 /mnt/huge
     echo "nodev /mnt/huge hugetlbfs defaults 0 0" >> /etc/fstab
@@ -126,8 +136,7 @@ else
         mount -t cgroup cpuset -o cpuset /sys/fs/cgroup/cpuset/
     fi
 
-    # Wait until rcnfs is ready
-    echo "Waiting for rcnfs to finish startup service..."
+    # Wait until rcnfs is properly set up
     while [ "$(ssh rcnfs "[ -f /local/startup_service_done ] && echo 1 || echo 0")" != "1" ]; do
         sleep 1
     done
@@ -138,10 +147,16 @@ else
     mkdir $SHARED_HOME; mount -t nfs4 $rcnfs_ip:$SHARED_HOME $SHARED_HOME
     echo "$rcnfs_ip:$SHARED_HOME $SHARED_HOME nfs4 rw,sync,hard,intr,addr=`hostname -i` 0 0" >> /etc/fstab
 
-    # Configure some cores to be in adaptive-ticks mode (need reboot to take effect)
+    # Isolate certain cpus from kernel scheduling and put them into full
+    # dynticks mode (need reboot to take effect)
+    isolcpus="2"
+    kernel_boot_params+="isolcpus=$isolcpus nohz_full=$isolcpus rcu_nocbs=$isolcpus"
+
+    # Update GRUB with our kernel boot parameters
     grub-install /dev/nvme0n1
-    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"nohz_full=2-5 rcu_nocbs=2-5\"" >> /etc/default/grub
+    sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"$kernel_boot_params /" /etc/default/grub
     update-grub
+    # TODO: VERIFY THE OPTIONS WORK? http://www.breakage.org/2013/11/15/nohz_fullgodmode/
 
     # Install Mellanox OFED (need reboot to work properly). Note: attempting to build
     # MLNX DPDK before installing MLNX OFED may result in compile-time errors.
