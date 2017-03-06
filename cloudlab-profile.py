@@ -6,10 +6,11 @@ import geni.aggregate.cloudlab as cloudlab
 pc = portal.Context()
 
 images = [ ("UBUNTU14-64-STD", "Ubuntu 14.04"),
+           ("UBUNTU15-04-64-STD", "Ubuntu 15.04"),
            ("UBUNTU16-64-STD", "Ubuntu 16.04")]
 
-types  = [ ("m510", "m510 (Intel Xeon-D)"),
-           ("d430", "d430 (Intel 2x10GbE)")]
+types = [ ("m510", "m510 (Intel Xeon-D)"),
+          ("d430", "d430 (Intel 2x10GbE)")]
 
 num_nodes = range(2, 22)
 
