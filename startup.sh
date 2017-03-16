@@ -22,13 +22,6 @@ if [ -f /local/startup_service_done ]; then
         echo 0 > /sys/devices/system/cpu/cpu$N/online
     done
 
-    # Set CPU scaling governor to "performance"
-    # Note: the effect `cpupower frequency-set -g performance` doesn't seem to persist?
-    # TODO: THIS ALSO DOESN'T SEEM TO PERSIST AS WELL...
-    for N in $(seq 0 $((NUM_CPUS/2-1))); do
-        echo performance > /sys/devices/system/cpu/cpu$N/cpufreq/scaling_governor
-    done
-
     # Sometimes (e.g. after each experiment extension) the CloudLab management
     # software will replace our authorized_keys settings; restore our settings
     # automatically after reboot.
@@ -54,9 +47,10 @@ apt-get --assume-yes install mosh vim tmux pdsh tree axel
 # NFS
 apt-get --assume-yes install nfs-kernel-server nfs-common
 
-# cpupower, etc.
+# cpupower, hugepages, etc.
 kernel_release=`uname -r`
-apt-get --assume-yes install linux-tools-common linux-tools-${kernel_release}
+apt-get --assume-yes install linux-tools-common linux-tools-${kernel_release} \
+        hugepages cpuset
 
 # Install RAMCloud dependencies
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
@@ -129,14 +123,10 @@ else
     # Enable hugepage support: http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html
     # The changes will take effects after reboot. m510 is not a NUMA machine.
     # Reserve 1GB hugepages via kernel boot parameters
-    kernel_boot_params="hugepagesz=1G hugepages=4"
-    # Or, 2MB hugepages after the system boots
-    # echo vm.nr_hugepages=1024 >> /etc/sysctl.conf
-    mkdir /mnt/huge
-    chmod 777 /mnt/huge
-    echo "nodev /mnt/huge hugetlbfs defaults 0 0" >> /etc/fstab
+    kernel_boot_params="default_hugepagesz=1G hugepagesz=1G hugepages=8"
 
     # Enable cpuset functionality if it's not been done yet.
+    # TODO: STILL NECESSARY AFTER INSTALLING CPUSET?
     if [ ! -d "/sys/fs/cgroup/cpuset" ]; then
         mount -t tmpfs cgroup_root /sys/fs/cgroup
         mkdir /sys/fs/cgroup/cpuset
@@ -160,7 +150,6 @@ else
     kernel_boot_params+=" isolcpus=$isolcpus nohz_full=$isolcpus rcu_nocbs=$isolcpus"
 
     # Update GRUB with our kernel boot parameters
-    grub-install /dev/nvme0n1
     sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"$kernel_boot_params /" /etc/default/grub
     update-grub
     # TODO: VERIFY THE OPTIONS WORK? http://www.breakage.org/2013/11/15/nohz_fullgodmode/
