@@ -17,7 +17,7 @@ DEBUG := no
 
 CCACHE := yes
 LINKER := gold
-DEBUG_OPT :=yes
+DEBUG_OPT := yes
 
 GLIBCXX_USE_CXX11_ABI := yes
 

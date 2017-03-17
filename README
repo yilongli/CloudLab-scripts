@@ -1,0 +1,4 @@
+1. Log into rcmaster and run cd /shome;/local/scripts/get_ramcloud.sh
+2. run /local/scripts/rcmaster_init.sh
+3. cp /local/scripts/ftrace-server.sh /shome
+

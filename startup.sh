@@ -52,15 +52,15 @@ kernel_release=`uname -r`
 apt-get --assume-yes install linux-tools-common linux-tools-${kernel_release} \
         hugepages cpuset
 
+# Dependencies to build the Linux perf tool
+apt-get --assume-yes install systemtap-sdt-dev libunwind-dev libaudit-dev \
+        libgtk2.0-dev libperl-dev binutils-dev liblzma-dev libiberty-dev
+
 # Install RAMCloud dependencies
 apt-get --assume-yes install build-essential git-core doxygen libpcre3-dev \
         protobuf-compiler libprotobuf-dev libcrypto++-dev libevent-dev \
         libboost-all-dev libgtest-dev libzookeeper-mt-dev zookeeper \
         libssl-dev default-jdk ccache
-
-# Install numpy, scipy, matplotlib and docopt
-apt-get --assume-yes install python-numpy python-scipy python-docopt \
-        python-matplotlib
 
 # Setup password-less ssh between nodes
 for user in $USERS; do
@@ -148,6 +148,9 @@ else
     # dynticks mode (need reboot to take effect)
     isolcpus="2"
     kernel_boot_params+=" isolcpus=$isolcpus nohz_full=$isolcpus rcu_nocbs=$isolcpus"
+
+    # Enable perf taken branch stack sampling (i.e. "perf record -b ...")
+    kernel_boot_params+=" lapic"
 
     # Update GRUB with our kernel boot parameters
     sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"$kernel_boot_params /" /etc/default/grub
