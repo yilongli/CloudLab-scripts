@@ -1,14 +1,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define unlikely(x) __builtin_expect((x),0)
+
 #define THRESHOLD_TICKS 1000
 
 static __inline __attribute__((always_inline))
 uint64_t rdtsc()
 {
-    uint32_t lo, hi;
-    __asm__ __volatile__("rdtsc" : "=a" (lo), "=d" (hi));
-    return (((uint64_t)hi << 32) | lo);
+    return __builtin_ia32_rdtsc();
 }
 
 int main(void)
@@ -18,7 +18,7 @@ int main(void)
     while (1) {
         uint64_t t1 = rdtsc();
         iter++;
-        if (t1 - t0 > THRESHOLD_TICKS) {
+        if (unlikely(t1 - t0 > THRESHOLD_TICKS)) {
             printf("Jitter detected, %lu cycles, iteration %lu\n", t1 - t0, iter);
             break;
         }
