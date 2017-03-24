@@ -47,10 +47,13 @@ apt-get --assume-yes install mosh vim tmux pdsh tree axel
 # NFS
 apt-get --assume-yes install nfs-kernel-server nfs-common
 
-# cpupower, hugepages, etc.
+# cpupower, hugepages, msr-tools (for rdmsr), i7z
 kernel_release=`uname -r`
 apt-get --assume-yes install linux-tools-common linux-tools-${kernel_release} \
-        hugepages cpuset
+        hugepages cpuset msr-tools i7z
+
+# TODO: useless unless using rt kernel; kernel driver hwlat.ko not included
+#rt-tests
 
 # Dependencies to build the Linux perf tool
 apt-get --assume-yes install systemtap-sdt-dev libunwind-dev libaudit-dev \
@@ -143,6 +146,13 @@ else
     rcnfs_ip=`ssh rcnfs "hostname -i"`
     mkdir $SHARED_HOME; mount -t nfs4 $rcnfs_ip:$SHARED_HOME $SHARED_HOME
     echo "$rcnfs_ip:$SHARED_HOME $SHARED_HOME nfs4 rw,sync,hard,intr,addr=`hostname -i` 0 0" >> /etc/fstab
+
+    # Disable intel_idle driver to gain control over C-states (this driver will
+    # most ignore any other BIOS setting and kernel parameters). Then limit
+    # available C-states to C1 by "idle=halt".
+    kernel_boot_params+=" intel_idle.max_cstate=0 idle=halt"
+    # Or more aggressively, keep processors in C0 even when they are idle.
+    #kernel_boot_params+=" idle=poll"
 
     # Isolate certain cpus from kernel scheduling and put them into full
     # dynticks mode (need reboot to take effect)
