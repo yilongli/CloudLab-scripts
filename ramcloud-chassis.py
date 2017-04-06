@@ -10,6 +10,7 @@ import geni.aggregate.cloudlab as cloudlab
 pc = portal.Context()
 
 images = [ ("UBUNTU14-64-STD", "Ubuntu 14.04"),
+           ("UBUNTU15-04-64-STD", "Ubuntu 15.04"),
            ("UBUNTU16-64-STD", "Ubuntu 16.04")]
 
 types  = [ ("m510", "m510 (Intel Xeon-D)")]
@@ -55,7 +56,7 @@ for i in range(1, num_nodes + 1):
     n = n + 1
 
     if rc_alias == "rcnfs":
-        # Ask for a 256GB file system mounted at /shome on rcnfs
+        # Ask for a 200GB file system mounted at /shome on rcnfs
         bs = node.Blockstore("bs", "/shome")
         bs.size = "200GB"
 
@@ -78,3 +79,4 @@ for i in range(1, num_nodes + 1):
     lan.addInterface(iface)
 
 pc.printRequestRSpec(rspec)
+
