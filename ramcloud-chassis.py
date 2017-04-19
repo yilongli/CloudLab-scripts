@@ -36,17 +36,18 @@ rspec = RSpec.Request()
 lan = RSpec.LAN()
 rspec.addResource(lan)
 
-skiplist = params.skip.split(",")
+skiplist = [x for x in params.skip.split(",") if x]
 
-num_nodes = 45 - len(skiplist)
+nodes_per_chassis = 45
+num_nodes = nodes_per_chassis - len(skiplist)
 
 rc_aliases = ["rcmaster", "rcnfs"]
 for i in range(num_nodes - 2):
     rc_aliases.append("rc%02d" % (i + 1))
 
 n = 0
-for i in range(1, num_nodes + 1):
-    name = "ms%02d%02d" % (params.chassis, i)
+for i in range(nodes_per_chassis):
+    name = "ms%02d%02d" % (params.chassis, i + 1)
 
     if name in skiplist:
         continue
