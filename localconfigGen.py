@@ -8,7 +8,7 @@ from sys import argv
 num_rcXX = int(argv[1])
 hosts = []
 for i in range(1, num_rcXX + 1):
-    result = subprocess.Popen(['rsh', 'rc%02d' % i, 'hostname -A; hostname -i'],
+    result = subprocess.Popen(['rsh', 'rc%02d' % i, 'hostname -A; hostname -I | cut -d\' \' -f2'],
         stdout=subprocess.PIPE).communicate()[0]
     hostname = result.split('.', 1)[0]
     ipAddr = result.splitlines()[1]
